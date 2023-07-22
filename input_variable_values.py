@@ -1,3 +1,5 @@
+"""define input variable discrete values and lower/upper bounds"""
+
 hardness_conc_values = [250, 437.5, 625, 812.5, 1000]
 silica_conc_values = [5, 23.75, 42.5, 61.25, 80]
 initial_ph_values = [3, 5, 7, 9, 11]
