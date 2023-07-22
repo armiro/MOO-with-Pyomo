@@ -1,13 +1,14 @@
-import numpy as np
-import pyomo.environ as pyo
-import output_functions as out_fns
 import random
+import pyomo.environ as pyo
 import matplotlib.pyplot as plt
 
+import output_functions as out_fns
+import input_variable_values as in_vars
 
 
 def plot_pareto_front(of1_values, of1_name, of2_values, of2_name):
-    fig = plt.figure(num=1)
+    """plot pareto-front plot as a scatter plot with num_optimal_solutions points"""
+    # fig = plt.figure(num=1)
     plt.scatter(of1_values, of2_values)
     plt.xlabel(of1_name)
     plt.ylabel(of2_name)
@@ -20,17 +21,17 @@ def plot_pareto_front(of1_values, of1_name, of2_values, of2_name):
 model = pyo.ConcreteModel(name='Pyomo Model')
 
 # define the independent variables
-# model.h_conc = pyo.Var(bounds=(250.0, 1000.0), domain=pyo.NonNegativeReals, initialize=250.0)
-# model.s_conc = pyo.Var(bounds=(5.0, 80.0), domain=pyo.NonNegativeReals, initialize=5.0)
-# model.ph = pyo.Var(bounds=(3.0, 11.0), domain=pyo.NonNegativeReals, initialize=3.0)
-# model.time = pyo.Var(bounds=(30.0, 90.0), domain=pyo.NonNegativeReals, initialize=30.0)
-# model.current = pyo.Var(bounds=(2.2, 11.1), domain=pyo.NonNegativeReals, initialize=2.2)
+# model.h_conc = pyo.Var(bounds=in_vars.hardness_conc_bounds, domain=pyo.NonNegativeReals, initialize=250.0)
+# model.s_conc = pyo.Var(bounds=in_vars.silica_conc_bounds, domain=pyo.NonNegativeReals, initialize=5.0)
+# model.ph = pyo.Var(bounds=in_vars.initial_ph_bounds, domain=pyo.NonNegativeReals, initialize=3.0)
+# model.time = pyo.Var(bounds=in_vars.contact_time_bounds, domain=pyo.NonNegativeReals, initialize=30.0)
+# model.current = pyo.Var(bounds=in_vars.current_density_bounds, domain=pyo.NonNegativeReals, initialize=2.2)
 
-model.h_conc = pyo.Var(bounds=(-2.0, 2.0), domain=pyo.NonNegativeReals)
-model.s_conc = pyo.Var(bounds=(-2.0, 2.0), domain=pyo.NonNegativeReals)
-model.ph = pyo.Var(bounds=(-2.0, 2.0), domain=pyo.NonNegativeReals)
-model.time = pyo.Var(bounds=(-2.0, 2.0), domain=pyo.NonNegativeReals)
-model.current = pyo.Var(bounds=(-2.0, 2.0), domain=pyo.NonNegativeReals)
+model.h_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
+model.s_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
+model.ph = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
+model.time = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
+model.current = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
 
 # define output variables as expressions
 model.hre = pyo.Expression(rule=out_fns.hardness_removal_efficiency, name='Hardness Removal Efficiency')
@@ -46,7 +47,7 @@ model.o_oc = pyo.Objective(expr=model.oc, sense=pyo.minimize)
 opt = pyo.SolverFactory('ipopt', executable='./optimizer/ipopt.exe')
 
 # define the number of optimal solutions
-num_optimal_solutions = 30
+NUM_OPTIMAL_SOLUTIONS = 30
 
 # define epsilon value ranges for each objective function (experimentally)
 hre_epsilon_range = (2, 10)
@@ -54,9 +55,9 @@ sre_epsilon_range = (0.2, 1)
 oc_epsilon_range = (0.5, 2)
 
 # generate random epsilon values for each objective function
-e_hre_vals = [round(random.uniform(*hre_epsilon_range), 2) for _ in range(num_optimal_solutions)]
-e_sre_vals = [round(random.uniform(*sre_epsilon_range), 2) for _ in range(num_optimal_solutions)]
-e_oc_vals = [round(random.uniform(*oc_epsilon_range), 2) for _ in range(num_optimal_solutions)]
+e_hre_vals = [round(random.uniform(*hre_epsilon_range), 2) for _ in range(NUM_OPTIMAL_SOLUTIONS)]
+e_sre_vals = [round(random.uniform(*sre_epsilon_range), 2) for _ in range(NUM_OPTIMAL_SOLUTIONS)]
+e_oc_vals = [round(random.uniform(*oc_epsilon_range), 2) for _ in range(NUM_OPTIMAL_SOLUTIONS)]
 
 # create a dictionary to store results
 all_results = {}
@@ -64,9 +65,9 @@ all_results = {}
 # solve the epsilon-constraint problem for each objective function
 for e_hre, e_sre, e_oc in zip(e_hre_vals, e_sre_vals, e_oc_vals):
     # fix one objective and optimize others
-    model.e_constraint_hre = pyo.Constraint(expr=(model.hre <= e_hre))
-    model.e_constraint_sre = pyo.Constraint(expr=(model.sre <= e_sre))
-    model.e_constraint_oc = pyo.Constraint(expr=(model.oc <= e_oc))
+    model.e_constraint_hre = pyo.Constraint(expr=model.hre <= e_hre)
+    model.e_constraint_sre = pyo.Constraint(expr=model.sre <= e_sre)
+    model.e_constraint_oc = pyo.Constraint(expr=model.oc <= e_oc)
 
     # Set the active objective to be maximized/minimized
     model.o_hre.activate()
@@ -106,4 +107,3 @@ objective2_values = [result['Objective 2 (sre)'] for result in all_results.value
 # Plot the Pareto front using a scatter plot
 plot_pareto_front(of1_values=objective1_values, of1_name=model.hre.getname(),
                   of2_values=objective2_values, of2_name=model.sre.getname())
-
