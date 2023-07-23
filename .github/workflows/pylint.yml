@@ -28,7 +28,6 @@ jobs:
 
       - name: run pylint score updater file
         run: python ./utils/pylint_score_updater.py
-#          pylint --exit-zero $(git ls-files '*.py')
 
       - name: config git user identity
         run: |
