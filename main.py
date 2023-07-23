@@ -1,3 +1,7 @@
+"""
+Multi-Objective Optimization using Pyomo with epsilon-constraint
+Developed by Arman H. (https://github.com/armiro)
+"""
 import random
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
