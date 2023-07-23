@@ -31,6 +31,6 @@ jobs:
 #          pylint --exit-zero $(git ls-files '*.py')
       - name: commit and push changes
         run: |
-          git add readme.md
+          git add README.md
           git commit -m "automatically update pylint score in the badge"
           git push
