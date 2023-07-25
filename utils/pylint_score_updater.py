@@ -2,7 +2,7 @@ import subprocess
 import re
 
 # run Pylint and get the output
-pylint_output = subprocess.check_output(['pylint', '--exit-zero', '*.py'])
+pylint_output = subprocess.check_output(['pylint', '--exit-zero', '$(git ls-files "*.py")'])
 
 # extract the Pylint score using regex
 score_match = re.search(r'Your code has been rated at (\d+.\d+)/10', pylint_output.decode())
