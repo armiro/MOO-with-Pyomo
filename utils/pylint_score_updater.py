@@ -5,17 +5,17 @@ along with appropriate badge color to the readme file icons
 import subprocess
 import re
 
-# run Pylint and get the output
+# run pylint and get the output
 python_file_names = subprocess.check_output(['git', 'ls-files', '*.py']).decode().splitlines()
 pylint_output = subprocess.check_output(['pylint', '--exit-zero'] + python_file_names)
 
-# extract the Pylint score using regex
+# extract the pylint score using regex
 score_match = re.search(r'Your code has been rated at (\d+.\d+)/10', pylint_output.decode())
 pylint_score = float(score_match.group(1)) if score_match else 0.0
 
 SCORE_COLOR = 'brightgreen' if pylint_score >= 8.0 else 'yellow' if pylint_score >= 6.0 else 'red'
 
-# update README.md with the Pylint badge and score
+# update readme.md with the pylint badge and score
 with open("README.md", mode="r") as readme_file:
     readme_content = readme_file.read()
 
