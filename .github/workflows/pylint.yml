@@ -34,7 +34,14 @@ jobs:
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config user.name "${GITHUB_ACTOR}"
 
-      - name: commit and push changes
+      - name: check if pylint score has changed
+        run: |
+          diff_result=$(git diff --exit-code README.md)
+          has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
+          echo "::set-output name=has_changed::$has_changed"
+
+      - name: commit and push changes if any
+        if: ${{ needs.check_changes.outputs.has_changed == 'True' }}
         run: |
           git add README.md
           git commit -m "automatically update pylint score in the badge"
