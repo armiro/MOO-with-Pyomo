@@ -21,7 +21,6 @@ with open("README.md", mode="r") as readme_file:
 
 with open("README.md", mode="w") as readme_file:
     updated_content = re.sub(pattern=r"!\[Pylint\].*",
-                             repl=f"![Pylint](https://img.shields.io/badge/PyLint-"
-                                  f"{pylint_score}/10-{SCORE_COLOR})",
+                             repl=f"![Pylint](https://img.shields.io/badge/PyLint-{pylint_score}/10-{SCORE_COLOR})",
                              string=readme_content)
     readme_file.write(updated_content)
