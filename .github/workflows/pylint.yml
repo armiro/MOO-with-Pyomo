@@ -36,7 +36,7 @@ jobs:
 
       - name: check if pylint score has changed
         run: |
-          diff_result=$(git diff README.md)
+          diff_result=$(git diff --exit-code ./README.md)
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
           echo "has_changed=$has_changed" >> $GITHUB_OUTPUT
 
