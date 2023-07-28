@@ -34,16 +34,16 @@ jobs:
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config user.name "${GITHUB_ACTOR}"
 
-      - name: Debug Info
-        run: |
-          pwd
-          ls -la
-
       - name: check if pylint score has changed
         run: |
           diff_result=$(git diff README.md)
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
-          echo "::set-output name=has_changed::$has_changed"
+          echo "has_changed=$has_changed" >> $GITHUB_OUTPUT
+
+      - name: Debug Info
+        run: |
+          echo $diff_result
+          echo $has_changed
 
       - name: commit and push changes if any
         if: ${{ needs.check_changes.outputs.has_changed == 'True' }}
