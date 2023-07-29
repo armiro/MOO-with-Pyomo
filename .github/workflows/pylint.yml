@@ -42,7 +42,7 @@ jobs:
       - name: check if pylint score has changed
         working-directory: ${{ github.workspace }}
         run: |
-          diff_result=git diff --exit-code ./README.md
+          diff_result=$(git diff --exit-code ./README.md)
           continue-on-error: true
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
           echo "has_changed=$has_changed" >> $GITHUB_OUTPUT
