@@ -52,7 +52,7 @@ jobs:
         run: echo "has_changed = ${{ needs.check_changes.outputs.has_changed }}"
 
       - name: commit and push changes if any
-        if: ${{ needs.check_changes.outputs.has_changed == "True" }}
+        if: ${{ needs.check_changes.outputs.has_changed == 'True' }}
         run: |
           git add README.md
           git commit -m "automatically update pylint score in the badge"
