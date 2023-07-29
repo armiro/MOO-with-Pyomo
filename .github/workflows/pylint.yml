@@ -47,6 +47,9 @@ jobs:
           set -e
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
           echo "::set-output name=has_changed::$has_changed"
+          echo "debugging..."
+          echo "$has_changed"
+          echo "done."
 
       - name: debug has_changed value
         run: echo "has_changed = ${{ needs.check_changes.outputs.has_changed }}"
