@@ -69,9 +69,9 @@ model.time = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
 model.current = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
 
 # define output variables as expressions
-model.hre = pyo.Expression(rule=out_fns.hardness_removal_efficiency, name='Hardness Removal Efficiency')
-model.sre = pyo.Expression(rule=out_fns.silica_removal_efficiency, name='Silica Removal Efficiency')
-model.oc = pyo.Expression(rule=out_fns.operating_cost, name='Operating Cost')
+model.hre = pyo.Expression(rule=out_fns.hardness_removal_efficiency)
+model.sre = pyo.Expression(rule=out_fns.silica_removal_efficiency)
+model.oc = pyo.Expression(rule=out_fns.operating_cost)
 
 # define the objective functions (to be minimized/maximized)
 model.o_hre = pyo.Objective(expr=model.hre, sense=pyo.maximize)

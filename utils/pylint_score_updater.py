@@ -8,7 +8,7 @@ import re
 # run pylint and get the output
 python_file_names = subprocess.check_output(['git', 'ls-files', '*.py']).decode().splitlines()
 pylint_output = subprocess.check_output(['pylint', '--exit-zero'] + python_file_names)
-print(pylint_output)
+print(pylint_output, end='\n')
 
 # extract the pylint score using regex
 score_match = re.search(r'Your code has been rated at (\d+.\d+)/10', pylint_output.decode())
@@ -22,6 +22,7 @@ with open("README.md", mode="r") as readme_file:
 
 with open("README.md", mode="w") as readme_file:
     updated_content = re.sub(pattern=r"!\[Pylint\].*",
-                             repl=f"![Pylint](https://img.shields.io/badge/PyLint-{pylint_score}/10-{SCORE_COLOR})",
+                             repl=f"![Pylint](https://img.shields.io/badge/PyLint-"
+                                  f"{pylint_score}/10-{SCORE_COLOR})",
                              string=readme_content)
     readme_file.write(updated_content)
