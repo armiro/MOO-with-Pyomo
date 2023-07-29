@@ -46,13 +46,13 @@ jobs:
           diff_result=$(git diff --exit-code ./README.md)
           set -e
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
-          echo "::set-output name=has_changed::$has_changed"
+          echo "{has_changed}={$has_changed}" >> $GITHUB_OUTPUT
           echo "debugging..."
           echo "$has_changed"
           echo "done."
 
       - name: debug has_changed value
-        run: echo "has_changed=${{ needs.check_changes.outputs.has_changed }}"
+        run: echo "$GITHUB_OUTPUT"
 
       - name: commit and push changes if any
         if: ${{ needs.check_changes.outputs.has_changed == 'true' }}
