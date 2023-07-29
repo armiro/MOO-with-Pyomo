@@ -40,9 +40,9 @@ jobs:
       - name: check if pylint score has changed
         working-directory: ${{ github.workspace }}
         run: |
-          diff_result=$(git diff --exit-code README.md)
-#          has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
-#          echo "has_changed=$has_changed" >> $GITHUB_OUTPUT
+          diff_result=True
+          has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
+          echo "has_changed=$has_changed" >> $GITHUB_OUTPUT
 
       - name: commit and push changes if any
 #        if: ${{ needs.check_changes.outputs.has_changed == 'True' }}
