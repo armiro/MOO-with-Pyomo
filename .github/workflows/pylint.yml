@@ -34,6 +34,9 @@ jobs:
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config user.name "${GITHUB_ACTOR}"
 
+      - name: Debug Git Status
+        run: git status
+
       - name: check if pylint score has changed
         run: |
           diff_result=$(git diff --exit-code ./README.md)
