@@ -43,9 +43,14 @@ jobs:
           diff_result=$(git diff --exit-code README.md)
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
           echo "has_changed=$has_changed" >> $GITHUB_OUTPUT
+          echo "start debugging"
+          echo $diff_result
+          echo $has_changed
+          pwd
+          echo "done"
 
       - name: commit and push changes if any
-#        if: ${{ needs.check_changes.outputs.has_changed == 'True' }}
+        if: ${{ needs.check_changes.outputs.has_changed == 'True' }}
         run: |
           git add README.md
           git commit -m "automatically update pylint score in the badge"
