@@ -52,7 +52,7 @@ jobs:
           echo "done."
 
       - name: debug has_changed value
-        run: echo "$GITHUB_OUTPUT"
+        run: echo "has_changed=${{ steps.check_if_pylint_score_has_changed.outputs.has_changed }}"
 
       - name: commit and push changes if any
         if: ${{ needs.check_changes.outputs.has_changed == 'true' }}
