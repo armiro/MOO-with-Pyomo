@@ -3,6 +3,7 @@ Multi-Objective Optimization using Pyomo with epsilon-constraint
 Developed by Arman H. (https://github.com/armiro)
 """
 # import random
+import csv
 import pyomo.environ as pyo
 import matplotlib.pyplot as plt
 import numpy as np
@@ -17,18 +18,37 @@ def plot_pareto_fronts(**objective_functions):
     :param objective_functions: kwargs containing a number of obj func names and values
     :return: None
     """
-    names = list()
-    of_values = list()
+    names = []
+    of_values = []
     for name, values in objective_functions.values():
         names.append(name)
         of_values.append(values)
     # fig = plt.figure(num=1)
-    plt.scatter(of_values[1], of_values[2])
+    plt.scatter(of_values[1], of_values[0])
     plt.xlabel(names[1])
-    plt.ylabel(names[2])
+    plt.ylabel(names[0])
     plt.title("Pareto-Front Plot")
     plt.grid(True)
     plt.show()
+
+
+def write_to_csv(filename, row):
+    """
+    write the input row as the last row of a CSV file
+    :param filename: CSV file path
+    :param row: list of input values
+    :return: None
+    """
+    with open(filename, mode='a', newline='') as csv_file:
+        csv.writer(csv_file).writerow(row)
+
+
+# define global constant variables
+OPTIMIZER = 'ipopt'
+OPT_PATH = './optimizer/ipopt.exe'
+RESULT_PATH = './results/'
+CSV_FILE_PATH = RESULT_PATH + 'optimal_solutions.csv'
+NUM_OPTIMAL_SOLUTIONS = 30  # same as number of epsilons
 
 
 # create a concrete Pyomo model
@@ -59,10 +79,7 @@ model.o_sre = pyo.Objective(expr=model.sre, sense=pyo.maximize)
 model.o_oc = pyo.Objective(expr=model.oc, sense=pyo.minimize)
 
 # create the solver instance
-opt = pyo.SolverFactory('ipopt', executable='./optimizer/ipopt.exe')
-
-# define the number of optimal solutions
-NUM_OPTIMAL_SOLUTIONS = 30
+opt = pyo.SolverFactory(OPTIMIZER, executable=OPT_PATH)
 
 # define epsilon range for each objective function (experimentally: min_of <= e <= max_of)
 e_hre_range = (out_fns.hardness_removal_efficiency.min, out_fns.hardness_removal_efficiency.max)
@@ -90,23 +107,23 @@ for e_hre, e_sre, e_oc in zip(e_hre_vals, e_sre_vals, e_oc_vals):
     model.e_constraint_oc = pyo.Constraint(expr=model.oc <= e_oc)
 
     # set the objective to be optimized (ONLY ONE can be set activated simultaneously)
-    model.o_hre.deactivate()
+    model.o_hre.activate()
     model.o_sre.deactivate()
-    model.o_oc.activate()
+    model.o_oc.deactivate()
 
     # solve the model using optimizer
     results = opt.solve(model, tee=True)
 
     # store the results in a dictionary
-    all_results['hre=%.2f sre=%.2f oc=%.2f' % (e_hre, e_sre, e_oc)] = {
-        "Objective 1 (hre)": pyo.value(model.o_hre),
-        "Objective 2 (sre)": pyo.value(model.o_sre),
-        "Objective 3 (oc)": pyo.value(model.o_oc),
-        "Inputs (h_conc)": {h: pyo.value(model.h_conc[h]) for h in model.h_conc},
-        "Inputs (s_conc)": {s: pyo.value(model.s_conc[s]) for s in model.s_conc},
-        "Inputs (ph)": {ph: pyo.value(model.ph[ph]) for ph in model.ph},
-        "Inputs (time)": {time: pyo.value(model.time[time]) for time in model.time},
-        "Inputs (current)": {current: pyo.value(model.current[current]) for current in model.current}
+    all_results['e_hre=%.2f e_sre=%.2f e_oc=%.2f' % (e_hre, e_sre, e_oc)] = {
+        "OF1 (hre)": round(pyo.value(model.o_hre), ndigits=2),
+        "OF2 (sre)": round(pyo.value(model.o_sre), ndigits=2),
+        "OF3 (oc)": round(pyo.value(model.o_oc), ndigits=2),
+        "X1 (h_conc)": round(pyo.value(model.h_conc), ndigits=2),
+        "X2 (s_conc)": round(pyo.value(model.s_conc), ndigits=2),
+        "X3 (ph)": round(pyo.value(model.ph), ndigits=2),
+        "X4 (time)": round(pyo.value(model.time), ndigits=2),
+        "X5 (current)": round(pyo.value(model.current), ndigits=2)
     }
 
     # remove the epsilon constraints after each iteration
@@ -114,21 +131,29 @@ for e_hre, e_sre, e_oc in zip(e_hre_vals, e_sre_vals, e_oc_vals):
     model.del_component(model.e_constraint_sre)
     model.del_component(model.e_constraint_oc)
 
-# print the results
-for e, result in all_results.items():
-    print(f"Epsilon: {e}")
+
+# initialize the CSV file with header
+header_row = ['Solution No.', 'X1 (mg/L)', 'X2 (mg/L)', 'X3', 'X4 (min)', 'X5 (mA/cm2)',
+              'OF1 (%)', 'OF2 (%)', 'OF3 (USD/m3)']
+write_to_csv(filename=CSV_FILE_PATH, row=header_row)
+
+# print the results and write each row to CSV file
+for idx, (e, result) in enumerate(all_results.items()):
+    print(f"Solution No. {idx+1} | Epsilon: {e}")
     for key, value in result.items():
         print(f"{key}: {value}")
+    write_to_csv(filename=CSV_FILE_PATH,
+                 row=[idx+1, result['X1 (h_conc)'], result['X2 (s_conc)'], result['X3 (ph)'],
+                      result['X4 (time)'], result['X5 (current)'],
+                      result['OF1 (hre)'], result['OF2 (sre)'], result['OF3 (oc)']])
     print("===" * 10)
 
 # extract the objective values from all_results
-obj1_values = [result['Objective 1 (hre)'] for result in all_results.values()]
-obj2_values = [result['Objective 2 (sre)'] for result in all_results.values()]
-obj3_values = [result['Objective 3 (oc)'] for result in all_results.values()]
+obj1_values = [result['OF1 (hre)'] for result in all_results.values()]
+obj2_values = [result['OF2 (sre)'] for result in all_results.values()]
+obj3_values = [result['OF3 (oc)'] for result in all_results.values()]
 
 # plot all pareto fronts using a scatter plot
 plot_pareto_fronts(of1=(model.hre.getname(), obj1_values),
                    of2=(model.sre.getname(), obj2_values),
                    of3=(model.oc.getname(), obj3_values))
-
-
