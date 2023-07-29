@@ -13,6 +13,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Enable Debug Output
+        run: set -x
+
       - name: checkout code
         uses: actions/checkout@v3
 
@@ -34,10 +37,8 @@ jobs:
           git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git config user.name "${GITHUB_ACTOR}"
 
-      - name: Debug Git Status
-        run: git diff --exit-code README.md
-
       - name: check if pylint score has changed
+        working-directory: ${{ github.workspace }}
         run: |
           diff_result=$(git diff --exit-code README.md) || true
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
