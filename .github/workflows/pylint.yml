@@ -13,8 +13,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Enable Debug Output
-        run: set -x
 
       - name: checkout code
         uses: actions/checkout@v3
@@ -44,14 +42,10 @@ jobs:
       - name: check if pylint score has changed
         working-directory: ${{ github.workspace }}
         run: |
-          diff_result=git diff --exit-code README.md
+          diff_result=git diff --exit-code ./README.md
+          continue-on-error: true
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
           echo "has_changed=$has_changed" >> $GITHUB_OUTPUT
-          echo "start debugging"
-          echo $diff_result
-          echo $has_changed
-          pwd
-          echo "done"
 
       - name: commit and push changes if any
         if: ${{ needs.check_changes.outputs.has_changed == 'True' }}
