@@ -44,8 +44,15 @@ jobs:
         run: |
           set +e
           diff_result=$(git diff --quiet ./README.md)
+          set -e
           has_changed="False"; [ -n "$diff_result" ] && has_changed="True"
           echo "has_changed=$has_changed" >> $GITHUB_OUTPUT
+          echo "debugging..."
+          echo "$diff_result"
+          echo "$has_changed"
+          pwd
+          ls -al
+          echo "done."
 
       - name: commit and push changes if any
         if: ${{ needs.check_changes.outputs.has_changed == 'True' }}
