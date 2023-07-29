@@ -35,7 +35,7 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
 
       - name: Debug Git Status
-        run: git status
+        run: git diff --exit-code README.md
 
       - name: check if pylint score has changed
         run: |
