@@ -39,7 +39,7 @@ def write_to_csv(filename, row):
     :param row: list of input values
     :return: None
     """
-    with open(filename, mode='a', newline='') as csv_file:
+    with open(filename, mode='a', newline='', encoding='utf-8') as csv_file:
         csv.writer(csv_file).writerow(row)
 
 
@@ -62,11 +62,11 @@ model = pyo.ConcreteModel(name='Pyomo Model')
 # model.current = pyo.Var(bounds=in_vars.current_density_bounds, domain=pyo.NonNegativeReals)
 
 # define the independent variables (coded values)
-model.h_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
-model.s_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
-model.ph = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
-model.time = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
-model.current = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.NonNegativeReals)
+model.h_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+model.s_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+model.ph = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+model.time = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+model.current = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
 
 # define output variables as expressions
 model.hre = pyo.Expression(rule=out_fns.hardness_removal_efficiency)
@@ -115,7 +115,7 @@ for e_hre, e_sre, e_oc in zip(e_hre_vals, e_sre_vals, e_oc_vals):
     results = opt.solve(model, tee=True)
 
     # store the results in a dictionary
-    all_results['e_hre=%.2f e_sre=%.2f e_oc=%.2f' % (e_hre, e_sre, e_oc)] = {
+    all_results[f'e_hre={e_hre:.2f} e_sre={e_sre:.2f} e_oc={e_oc:.2f}'] = {
         "OF1 (hre)": round(pyo.value(model.o_hre), ndigits=2),
         "OF2 (sre)": round(pyo.value(model.o_sre), ndigits=2),
         "OF3 (oc)": round(pyo.value(model.o_oc), ndigits=2),
