@@ -40,6 +40,7 @@ jobs:
           git config user.name "${GITHUB_ACTOR}"
 
       - name: check if pylint score has changed
+        id: check_pylint
         working-directory: ${{ github.workspace }}
         run: |
           set +e
@@ -52,7 +53,7 @@ jobs:
           echo "done."
 
       - name: debug has_changed value
-        run: echo "has_changed=$has_changed"
+        run: echo "has_changed=${{ steps.check_pylint.outputs.has_changed }}"
 
       - name: commit and push changes if any
         if: ${{ needs.check_changes.outputs.has_changed == 'true' }}
