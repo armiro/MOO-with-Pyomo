@@ -22,7 +22,7 @@ def hardness_removal_efficiency(model):
     return intercept + linear_coefs + interaction_coefs + quadratic_coefs
 
 
-# set minimum and maximum possible values based on RSM experiments
+# dynamically set minimum and maximum possible values based on RSM experiments
 setattr(hardness_removal_efficiency, 'min', 18.00)
 setattr(hardness_removal_efficiency, 'max', 84.70)
 
@@ -48,7 +48,7 @@ def silica_removal_efficiency(model):
     return intercept + linear_coefs + interaction_coefs + quadratic_coefs
 
 
-# set minimum and maximum possible values based on RSM experiments
+# dynamically set minimum and maximum possible values based on RSM experiments
 setattr(silica_removal_efficiency, 'min', 94.00)
 setattr(silica_removal_efficiency, 'max', 97.60)
 
@@ -74,6 +74,6 @@ def operating_cost(model):
     return intercept + linear_coefs + interaction_coefs + quadratic_coefs
 
 
-# set minimum and maximum possible values based on RSM experiments
+# dynamically set minimum and maximum possible values based on RSM experiments
 setattr(operating_cost, 'min', 1.52)
 setattr(operating_cost, 'max', 8.10)
