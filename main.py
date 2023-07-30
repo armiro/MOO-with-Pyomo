@@ -29,12 +29,13 @@ def plot_pareto_fronts(target_name, **objective_functions):
             of_values_list.append(values)
 
     for of_name, of_values in zip(of_names, of_values_list):
+        plt.clf()
         plt.scatter(of_values, target_values)
         plt.xlabel(of_name)
         plt.ylabel(target_name)
         plt.title(f"Pareto-Front Plot ({target_name}/{of_name})")
         plt.grid(True)
-        plt.show()
+        plt.savefig(fname=f'{RESULT_PATH}/pareto_front_{target_name}_{of_name}.png')
 
 
 def write_to_csv(filename, row):
