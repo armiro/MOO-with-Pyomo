@@ -16,10 +16,10 @@ pylint_score = float(score_match.group(1)) if score_match else 0.0
 SCORE_COLOR = 'brightgreen' if pylint_score >= 8.0 else 'yellow' if pylint_score >= 6.0 else 'red'
 
 # update readme.md with the pylint badge and score
-with open("README.md", mode="r") as readme_file:
+with open('README.md', mode='r', encoding='utf-8') as readme_file:
     readme_content = readme_file.read()
 
-with open("README.md", mode="w") as readme_file:
+with open('README.md', mode='w', encoding='utf-8') as readme_file:
     updated_content = re.sub(pattern=r"!\[Pylint\].*",
                              repl=f"![Pylint](https://img.shields.io/badge/PyLint-"
                                   f"{pylint_score}/10-{SCORE_COLOR})",
