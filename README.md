@@ -1,6 +1,6 @@
 # MOO-with-Pyomo
 [![License: MIT](https://img.shields.io/badge/License-MIT-blueviolet.svg)](https://opensource.org/licenses/MIT)
-![Status: Under Development](https://img.shields.io/badge/Status-Under%20Development-yellowgreen.svg)
+![Status: Finalizing](https://img.shields.io/badge/Status-Under%20Development-yellowgreen.svg)
 ![Pylint](https://img.shields.io/badge/PyLint-7.46/10-yellow)
 [![Optimizer: IPOPT](https://img.shields.io/badge/Optimizer-IPOPT-orange.svg)](https://github.com/armiro/MOO-with-Pyomo/tree/main/optimizer)
 
