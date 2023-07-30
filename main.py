@@ -12,24 +12,29 @@ import output_functions as out_fns
 import input_variable_values as in_vars
 
 
-def plot_pareto_fronts(**objective_functions):
+def plot_pareto_fronts(target_name, **objective_functions):
     """
     plot pareto-front plot as a scatter plot with num_optimal_solutions points
-    :param objective_functions: kwargs containing a number of obj func names and values
+    :param target_name: string, name of the function to set as y-axis
+    :param objective_functions: kwargs, a number of obj func names and values
     :return: None
     """
-    names = []
-    of_values = []
+    of_names = []
+    of_values_list = []
     for name, values in objective_functions.values():
-        names.append(name)
-        of_values.append(values)
-    # fig = plt.figure(num=1)
-    plt.scatter(of_values[1], of_values[0])
-    plt.xlabel(names[1])
-    plt.ylabel(names[0])
-    plt.title("Pareto-Front Plot")
-    plt.grid(True)
-    plt.show()
+        if name is target_name:
+            target_values = values
+        else:
+            of_names.append(name)
+            of_values_list.append(values)
+
+    for of_name, of_values in zip(of_names, of_values_list):
+        plt.scatter(of_values, target_values)
+        plt.xlabel(of_name)
+        plt.ylabel(target_name)
+        plt.title(f"Pareto-Front Plot ({target_name}/{of_name})")
+        plt.grid(True)
+        plt.show()
 
 
 def write_to_csv(filename, row):
@@ -41,6 +46,18 @@ def write_to_csv(filename, row):
     """
     with open(filename, mode='a', newline='', encoding='utf-8') as csv_file:
         csv.writer(csv_file).writerow(row)
+
+
+def find_active_obj_fn_from(*obj_fns):
+    """
+    find the first active objective function from the input list of functions
+    :param obj_fns: args, a number of objective functions
+    :return: pyomo objective function
+    :raises ValueError: if none of the functions are active
+    """
+    for obj_fn in obj_fns:
+        if obj_fn.active: return obj_fn
+    raise ValueError("None of the objective functions are activated.")
 
 
 # define global constant variables
@@ -154,6 +171,8 @@ obj2_values = [result['OF2 (sre)'] for result in all_results.values()]
 obj3_values = [result['OF3 (oc)'] for result in all_results.values()]
 
 # plot all pareto fronts using a scatter plot
-plot_pareto_fronts(of1=(model.hre.getname(), obj1_values),
+target_of_name = find_active_obj_fn_from(model.o_hre, model.o_sre, model.o_oc).expr.getname()
+plot_pareto_fronts(target_name=target_of_name,
+                   of1=(model.hre.getname(), obj1_values),
                    of2=(model.sre.getname(), obj2_values),
                    of3=(model.oc.getname(), obj3_values))
