@@ -33,9 +33,11 @@ def plot_pareto_fronts(target_name, **objective_functions):
         plt.scatter(of_values, target_values)
         plt.xlabel(of_name)
         plt.ylabel(target_name)
-        plt.title(f"Pareto-Front Plot ({target_name}/{of_name})")
+        plt.title('Pareto-Front Plot')
         plt.grid(True)
-        plt.savefig(fname=f'{RESULT_PATH}/pareto_front_{target_name}_{of_name}.png')
+        plt.savefig(fname=f"{RESULT_PATH}/pareto_front_"
+                          f"{''.join(l[0] for l in target_name.split())}_"
+                          f"{''.join(l[0] for l in of_name.split())}.png")
 
 
 def write_to_csv(filename, row):
@@ -86,10 +88,10 @@ model.ph = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
 model.time = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
 model.current = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
 
-# define output variables as expressions
-model.hre = pyo.Expression(rule=out_fns.hardness_removal_efficiency)
-model.sre = pyo.Expression(rule=out_fns.silica_removal_efficiency)
-model.oc = pyo.Expression(rule=out_fns.operating_cost)
+# define outputs as expressions (using 'rule' instead of 'expr' to handle complex expressions)
+model.hre = pyo.Expression(rule=out_fns.hardness_removal_efficiency, doc='Hardness Removal Efficiency')
+model.sre = pyo.Expression(rule=out_fns.silica_removal_efficiency, doc='Silica Removal Efficiency')
+model.oc = pyo.Expression(rule=out_fns.operating_cost, doc='Operating Cost')
 
 # define the objective functions (to be minimized/maximized)
 model.o_hre = pyo.Objective(expr=model.hre, sense=pyo.maximize)
@@ -125,9 +127,9 @@ for e_hre, e_sre, e_oc in zip(e_hre_vals, e_sre_vals, e_oc_vals):
     model.e_constraint_oc = pyo.Constraint(expr=model.oc <= e_oc)
 
     # set the objective to be optimized (ONLY ONE can be set activated simultaneously)
-    model.o_hre.activate()
+    model.o_hre.deactivate()
     model.o_sre.deactivate()
-    model.o_oc.deactivate()
+    model.o_oc.activate()
 
     # solve the model using optimizer
     results = opt.solve(model, tee=True)
@@ -172,8 +174,8 @@ obj2_values = [result['OF2 (sre)'] for result in all_results.values()]
 obj3_values = [result['OF3 (oc)'] for result in all_results.values()]
 
 # plot all pareto fronts using a scatter plot
-target_of_name = find_active_obj_fn_from(model.o_hre, model.o_sre, model.o_oc).expr.getname()
+target_of_name = find_active_obj_fn_from(model.o_hre, model.o_sre, model.o_oc).expr.doc
 plot_pareto_fronts(target_name=target_of_name,
-                   of1=(model.hre.getname(), obj1_values),
-                   of2=(model.sre.getname(), obj2_values),
-                   of3=(model.oc.getname(), obj3_values))
+                   of1=(model.hre.doc, obj1_values),
+                   of2=(model.sre.doc, obj2_values),
+                   of3=(model.oc.doc, obj3_values))
