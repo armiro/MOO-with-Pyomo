@@ -38,6 +38,13 @@ def plot_pareto_fronts(target_name, **objective_functions):
         plt.savefig(fname=f"{RESULT_PATH}/pareto_front_"
                           f"{''.join(l[0] for l in target_name.split())}_"
                           f"{''.join(l[0] for l in of_name.split())}.png")
+    plt.clf()
+    plt.scatter(of_values_list[0], of_values_list[1])
+    plt.xlabel(of_names[0])
+    plt.ylabel(of_names[1])
+    plt.title('Pareto-Front Plot')
+    plt.grid(True)
+    plt.savefig(fname=f"{RESULT_PATH}/pareto_front_{of_names[0]}_{of_names[1]}.png")
 
 
 def write_to_csv(filename, row):
@@ -63,6 +70,17 @@ def find_active_obj_fn_from(*obj_fns):
     raise ValueError("None of the objective functions are activated.")
 
 
+def find_obj_fn_boundaries(*expressions, optimizer, pyo_model):
+    for expr in expressions:
+        for sense in [pyo.maximize, pyo.minimize]:
+            pyo_model.obj_fn = pyo.Objective(expr=expr, sense=sense)
+            pyo_model.obj_fn.activate()
+            optimizer.solve(pyo_model, tee=True)
+            expr_optimum = pyo.value(pyo_model.obj_fn)
+            setattr(expr, 'min' if sense == pyo.minimize else 'max', expr_optimum)
+            pyo_model.del_component(name_or_object='obj_fn')
+
+
 # define global constant variables
 OPTIMIZER = 'ipopt'
 OPT_PATH = './optimizer/ipopt.exe'
@@ -75,36 +93,33 @@ NUM_OPTIMAL_SOLUTIONS = 30  # same as number of epsilons
 model = pyo.ConcreteModel(name='Pyomo Model')
 
 # define the independent variables (raw values)
-# model.h_conc = pyo.Var(bounds=in_vars.hardness_conc_bounds, domain=pyo.NonNegativeReals)
-# model.s_conc = pyo.Var(bounds=in_vars.silica_conc_bounds, domain=pyo.NonNegativeReals)
-# model.ph = pyo.Var(bounds=in_vars.initial_ph_bounds, domain=pyo.NonNegativeReals)
-# model.time = pyo.Var(bounds=in_vars.contact_time_bounds, domain=pyo.NonNegativeReals)
-# model.current = pyo.Var(bounds=in_vars.current_density_bounds, domain=pyo.NonNegativeReals)
+model.h_conc = pyo.Var(bounds=in_vars.hardness_conc_bounds, domain=pyo.NonNegativeReals)
+model.s_conc = pyo.Var(bounds=in_vars.silica_conc_bounds, domain=pyo.NonNegativeReals)
+model.ph = pyo.Var(bounds=in_vars.initial_ph_bounds, domain=pyo.NonNegativeReals)
+model.time = pyo.Var(bounds=in_vars.contact_time_bounds, domain=pyo.NonNegativeReals)
+model.current = pyo.Var(bounds=in_vars.current_density_bounds, domain=pyo.NonNegativeReals)
 
 # define the independent variables (coded values)
-model.h_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
-model.s_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
-model.ph = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
-model.time = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
-model.current = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+# model.h_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+# model.s_conc = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+# model.ph = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+# model.time = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
+# model.current = pyo.Var(bounds=in_vars.coded_bounds, domain=pyo.Reals)
 
 # define outputs as expressions (using 'rule' instead of 'expr' to handle complex expressions)
 model.hre = pyo.Expression(rule=out_fns.hardness_removal_efficiency, doc='Hardness Removal Efficiency')
 model.sre = pyo.Expression(rule=out_fns.silica_removal_efficiency, doc='Silica Removal Efficiency')
 model.oc = pyo.Expression(rule=out_fns.operating_cost, doc='Operating Cost')
 
-# define the objective functions (to be minimized/maximized)
-model.o_hre = pyo.Objective(expr=model.hre, sense=pyo.maximize)
-model.o_sre = pyo.Objective(expr=model.sre, sense=pyo.maximize)
-model.o_oc = pyo.Objective(expr=model.oc, sense=pyo.minimize)
-
 # create the solver instance
-opt = pyo.SolverFactory(OPTIMIZER, executable=OPT_PATH)
+opt = pyo.SolverFactory(OPTIMIZER, executable=OPT_PATH, solver_io='nl')
+# opt = pyo.SolverFactory('scipampl', executable='./optimizer/scip.exe', solver_io='nl')
 
 # define epsilon range for each objective function (experimentally: min_of <= e <= max_of)
-e_hre_range = (out_fns.hardness_removal_efficiency.min, out_fns.hardness_removal_efficiency.max)
-e_sre_range = (out_fns.silica_removal_efficiency.min, out_fns.silica_removal_efficiency.max)
-e_oc_range = (out_fns.operating_cost.min, out_fns.operating_cost.max)
+find_obj_fn_boundaries(model.hre, model.sre, model.oc, optimizer=opt, pyo_model=model)
+e_hre_range = (model.hre.min, model.hre.max)
+e_sre_range = (model.sre.min, model.sre.max)
+e_oc_range = (model.oc.min, model.oc.max)
 
 # generate random epsilon values for each objective function
 # e_hre_vals = [round(random.uniform(*e_hre_range), 2) for _ in range(NUM_OPTIMAL_SOLUTIONS)]
@@ -115,6 +130,11 @@ e_oc_range = (out_fns.operating_cost.min, out_fns.operating_cost.max)
 e_hre_vals = np.arange(*e_hre_range, (e_hre_range[1]-e_hre_range[0])/NUM_OPTIMAL_SOLUTIONS)
 e_sre_vals = np.arange(*e_sre_range, (e_sre_range[1]-e_sre_range[0])/NUM_OPTIMAL_SOLUTIONS)
 e_oc_vals = np.arange(*e_oc_range, (e_oc_range[1]-e_oc_range[0])/NUM_OPTIMAL_SOLUTIONS)
+
+# define the objective functions (to be minimized/maximized)
+model.o_hre = pyo.Objective(expr=model.hre, sense=pyo.maximize)
+model.o_sre = pyo.Objective(expr=model.sre, sense=pyo.maximize)
+model.o_oc = pyo.Objective(expr=model.oc, sense=pyo.minimize)
 
 # create a dictionary to store results
 all_results = {}
@@ -127,12 +147,12 @@ for e_hre, e_sre, e_oc in zip(e_hre_vals, e_sre_vals, e_oc_vals):
     model.e_constraint_oc = pyo.Constraint(expr=model.oc <= e_oc)
 
     # set the objective to be optimized (ONLY ONE can be set activated simultaneously)
-    model.o_hre.deactivate()
+    model.o_hre.activate()
     model.o_sre.deactivate()
-    model.o_oc.activate()
+    model.o_oc.deactivate()
 
     # solve the model using optimizer
-    results = opt.solve(model, tee=True)
+    opt.solve(model, tee=True)
 
     # store the results in a dictionary
     all_results[f'e_hre={e_hre:.2f} e_sre={e_sre:.2f} e_oc={e_oc:.2f}'] = {
