@@ -8,10 +8,10 @@ current_density_values = [2.2, 4.425, 6.65, 8.875, 11.1]
 
 coded_values = [-2.0, -1.0, 0.0, +1.0, +2.0]
 
-hardness_conc_bounds = (min(hardness_conc_values), max(hardness_conc_values))
-silica_conc_bounds = (min(silica_conc_values,), max(silica_conc_values))
-initial_ph_bounds = (min(initial_ph_values), max(initial_ph_values))
-contact_time_bounds = (min(contact_time_values), max(contact_time_values))
-current_density_bounds = (min(current_density_values), max(current_density_values))
+hardness_conc_bounds = (hardness_conc_values[1], hardness_conc_values[-2])
+silica_conc_bounds = (silica_conc_values[1], silica_conc_values[-2])
+initial_ph_bounds = (initial_ph_values[1], initial_ph_values[-2])
+contact_time_bounds = (contact_time_values[1], contact_time_values[-2])
+current_density_bounds = (current_density_values[1], current_density_values[-1])
 
 coded_bounds = (min(coded_values), max(coded_values))
