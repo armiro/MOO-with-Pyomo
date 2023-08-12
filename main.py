@@ -66,11 +66,20 @@ def find_active_obj_fn_from(*obj_fns):
     :raises ValueError: if none of the functions are active
     """
     for obj_fn in obj_fns:
-        if obj_fn.active: return obj_fn
+        if obj_fn.active:
+            return obj_fn
     raise ValueError("None of the objective functions are activated.")
 
 
 def find_obj_fn_boundaries(*expressions, optimizer, pyo_model):
+    """
+    extract possible optimum (min/max) values for each output function. values are set as
+    attributes for model expressions to later set boundaries of epsilon values
+    :param expressions: pyomo expressions (output functions)
+    :param optimizer: pyomo solver (e.g. IPOPT)
+    :param pyo_model: pyomo concrete model
+    :return: None
+    """
     for expr in expressions:
         for sense in [pyo.maximize, pyo.minimize]:
             pyo_model.obj_fn = pyo.Objective(expr=expr, sense=sense)
@@ -113,7 +122,6 @@ model.oc = pyo.Expression(rule=out_fns.operating_cost, doc='Operating Cost')
 
 # create the solver instance
 opt = pyo.SolverFactory(OPTIMIZER, executable=OPT_PATH, solver_io='nl')
-# opt = pyo.SolverFactory('scipampl', executable='./optimizer/scip.exe', solver_io='nl')
 
 # define epsilon range for each objective function (experimentally: min_of <= e <= max_of)
 find_obj_fn_boundaries(model.hre, model.sre, model.oc, optimizer=opt, pyo_model=model)
@@ -186,7 +194,7 @@ for idx, (e, result) in enumerate(all_results.items()):
                  row=[idx+1, result['X1 (h_conc)'], result['X2 (s_conc)'], result['X3 (ph)'],
                       result['X4 (time)'], result['X5 (current)'],
                       result['OF1 (hre)'], result['OF2 (sre)'], result['OF3 (oc)']])
-    print("===" * 10)
+    print("=" * 50)
 
 # extract the objective values from all_results
 obj1_values = [result['OF1 (hre)'] for result in all_results.values()]

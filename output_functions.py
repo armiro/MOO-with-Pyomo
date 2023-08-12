@@ -30,17 +30,17 @@ def hardness_removal_efficiency(model):
     :return: float
     """
     intercept = -260.31202
-    linear_coefs = 0.007559 * model.h_conc + 1.23314 * model.s_conc + 18.71764 * model.ph + \
-                   4.05005 * model.time + 23.68839 * model.current
-    interaction_coefs = -0.000732 * model.h_conc * model.s_conc + 0.003402 * model.h_conc * model.ph - \
-                        0.000658 * model.h_conc * model.time - 0.012197 * model.h_conc * model.current + \
-                        0.111020 * model.s_conc * model.ph - 0.020847 * model.s_conc * model.time - \
-                        0.095898 * model.s_conc * model.current - 0.179609 * model.ph * model.time - \
-                        1.15747 * model.ph * model.current + 0.080172 * model.time * model.current
-    quadratic_coefs = 0.000059 * (model.h_conc ** 2) + 0.006164 * (model.s_conc ** 2) - \
-                      0.067616 * (model.ph ** 2) - 0.015202 * (model.time ** 2) - \
-                      0.549520 * (model.current ** 2)
-    return intercept + linear_coefs + interaction_coefs + quadratic_coefs
+    linear_coefs = 0.007559 * model.h_conc + 1.23314 * model.s_conc + 18.71764 * model.ph \
+                   + 4.05005 * model.time + 23.68839 * model.current
+    inter_coefs = -0.000732 * model.h_conc * model.s_conc + 0.003402 * model.h_conc * model.ph \
+                  - 0.000658 * model.h_conc * model.time - 0.012197 * model.h_conc * model.current \
+                  + 0.111020 * model.s_conc * model.ph - 0.020847 * model.s_conc * model.time \
+                  - 0.095898 * model.s_conc * model.current - 0.179609 * model.ph * model.time \
+                  - 1.15747 * model.ph * model.current + 0.080172 * model.time * model.current
+    quad_coefs = 0.000059 * (model.h_conc ** 2) + 0.006164 * (model.s_conc ** 2) \
+                 - 0.067616 * (model.ph ** 2) - 0.015202 * (model.time ** 2) \
+                 - 0.549520 * (model.current ** 2)
+    return intercept + linear_coefs + inter_coefs + quad_coefs
 
 
 # def silica_removal_efficiency(model):
@@ -72,17 +72,17 @@ def silica_removal_efficiency(model):
     :return: float
     """
     intercept = 87.44927
-    linear_coefs = 0.006637 * model.h_conc + 0.247365 * model.s_conc + 3.38268 * model.ph - \
-                   0.445563 * model.time + 0.126412 * model.current
-    interaction_coefs = -0.000150 * model.h_conc * model.s_conc - 0.001738 * model.h_conc * model.ph + \
-                        0.000334 * model.h_conc * model.time - 0.000214 * model.h_conc * model.current + \
-                        0.013380 * model.s_conc * model.ph + 0.002172 * model.s_conc * model.time + \
-                        0.017121 * model.s_conc * model.current - 0.031308 * model.ph * model.time + \
-                        0.036911 * model.ph * model.current - 0.005296 * model.time * model.current
-    quadratic_coefs = -0.00000552117 * (model.h_conc ** 2) - 0.004072 * (model.s_conc ** 2) - \
-                      0.070401 * (model.ph ** 2) + 0.002681 * (model.time ** 2) - \
-                      0.031633 * (model.current ** 2)
-    return intercept + linear_coefs + interaction_coefs + quadratic_coefs
+    linear_coefs = 0.006637 * model.h_conc + 0.247365 * model.s_conc + 3.38268 * model.ph \
+                   - 0.445563 * model.time + 0.126412 * model.current
+    inter_coefs = -0.000150 * model.h_conc * model.s_conc - 0.001738 * model.h_conc * model.ph \
+                  + 0.000334 * model.h_conc * model.time - 0.000214 * model.h_conc * model.current \
+                  + 0.013380 * model.s_conc * model.ph + 0.002172 * model.s_conc * model.time \
+                  + 0.017121 * model.s_conc * model.current - 0.031308 * model.ph * model.time \
+                  + 0.036911 * model.ph * model.current - 0.005296 * model.time * model.current
+    quad_coefs = -0.00000552117 * (model.h_conc ** 2) - 0.004072 * (model.s_conc ** 2) \
+                 - 0.070401 * (model.ph ** 2) + 0.002681 * (model.time ** 2) \
+                 - 0.031633 * (model.current ** 2)
+    return intercept + linear_coefs + inter_coefs + quad_coefs
 
 
 # def operating_cost(model):
@@ -114,14 +114,14 @@ def operating_cost(model):
     :return: float
     """
     intercept = 1.60701
-    linear_coefs = 0.007692 * model.h_conc - 0.030003 * model.s_conc + 0.839294 * model.ph - \
-                   0.055121 * model.time - 1.70536 * model.current
-    interaction_coefs = -0.000043 * model.h_conc * model.s_conc - 0.000137 * model.h_conc * model.ph - \
-                        0.000097 * model.h_conc * model.time + 0.000390 * model.h_conc * model.current + \
-                        0.003300 * model.s_conc * model.ph + 0.000596 * model.s_conc * model.time + \
-                        0.000599 * model.s_conc * model.current - 0.003125 * model.ph * model.time - \
-                        0.033989 * model.ph * model.current + 0.025768 * model.time * model.current
-    quadratic_coefs = -0.000000844685 * (model.h_conc ** 2) - 0.000070 * (model.s_conc ** 2) - \
-                      0.035549 * (model.ph ** 2) + 0.000229 * (model.time ** 2) + \
-                      0.057125 * (model.current ** 2)
-    return intercept + linear_coefs + interaction_coefs + quadratic_coefs
+    linear_coefs = 0.007692 * model.h_conc - 0.030003 * model.s_conc + 0.839294 * model.ph \
+                   - 0.055121 * model.time - 1.70536 * model.current
+    inter_coefs = -0.000043 * model.h_conc * model.s_conc - 0.000137 * model.h_conc * model.ph \
+                  - 0.000097 * model.h_conc * model.time + 0.000390 * model.h_conc * model.current \
+                  + 0.003300 * model.s_conc * model.ph + 0.000596 * model.s_conc * model.time \
+                  + 0.000599 * model.s_conc * model.current - 0.003125 * model.ph * model.time \
+                  - 0.033989 * model.ph * model.current + 0.025768 * model.time * model.current
+    quad_coefs = -0.000000844685 * (model.h_conc ** 2) - 0.000070 * (model.s_conc ** 2) \
+                 - 0.035549 * (model.ph ** 2) + 0.000229 * (model.time ** 2) \
+                 + 0.057125 * (model.current ** 2)
+    return intercept + linear_coefs + inter_coefs + quad_coefs
