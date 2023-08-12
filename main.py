@@ -44,7 +44,9 @@ def plot_pareto_fronts(target_name, **objective_functions):
     plt.ylabel(of_names[1])
     plt.title('Pareto-Front Plot')
     plt.grid(True)
-    plt.savefig(fname=f"{RESULT_PATH}/pareto_front_{of_names[0]}_{of_names[1]}.png")
+    plt.savefig(fname=f"{RESULT_PATH}/pareto_front_"
+                      f"{''.join(l[0] for l in of_names[0].split())}_"
+                      f"{''.join(l[0] for l in of_names[1].split())}.png")
 
 
 def write_to_csv(filename, row):
@@ -67,11 +69,11 @@ def find_active_obj_fn_from(*obj_fns):
     """
     for obj_fn in obj_fns:
         if obj_fn.active:
-            return obj_fn
+            return obj_fn.expr.doc
     raise ValueError("None of the objective functions are activated.")
 
 
-def find_obj_fn_boundaries(*expressions, optimizer, pyo_model):
+def set_obj_fn_boundaries(*expressions, optimizer, pyo_model):
     """
     extract possible optimum (min/max) values for each output function. values are set as
     attributes for model expressions to later set boundaries of epsilon values
@@ -123,8 +125,9 @@ model.oc = pyo.Expression(rule=out_fns.operating_cost, doc='Operating Cost')
 # create the solver instance
 opt = pyo.SolverFactory(OPTIMIZER, executable=OPT_PATH, solver_io='nl')
 
-# define epsilon range for each objective function (experimentally: min_of <= e <= max_of)
-find_obj_fn_boundaries(model.hre, model.sre, model.oc, optimizer=opt, pyo_model=model)
+# find boundaries of each objective function by solving single-objective problem and
+# define epsilon range for each objective function using calculated optimum values
+set_obj_fn_boundaries(model.hre, model.sre, model.oc, optimizer=opt, pyo_model=model)
 e_hre_range = (model.hre.min, model.hre.max)
 e_sre_range = (model.sre.min, model.sre.max)
 e_oc_range = (model.oc.min, model.oc.max)
@@ -202,7 +205,7 @@ obj2_values = [result['OF2 (sre)'] for result in all_results.values()]
 obj3_values = [result['OF3 (oc)'] for result in all_results.values()]
 
 # plot all pareto fronts using a scatter plot
-target_of_name = find_active_obj_fn_from(model.o_hre, model.o_sre, model.o_oc).expr.doc
+target_of_name = find_active_obj_fn_from(model.o_hre, model.o_sre, model.o_oc)
 plot_pareto_fronts(target_name=target_of_name,
                    of1=(model.hre.doc, obj1_values),
                    of2=(model.sre.doc, obj2_values),
