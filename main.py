@@ -16,6 +16,8 @@ OPTIMIZER = 'ipopt'
 OPT_PATH = './optimizer/ipopt.exe'
 RESULT_PATH = './results/'
 CSV_FILE_PATH = RESULT_PATH + 'optimal_solutions.csv'
+CSV_HEADER = ['Solution No.', 'X1 (mg/L)', 'X2 (mg/L)', 'X3', 'X4 (min)', 'X5 (mA/cm2)',
+              'OF1 (%)', 'OF2 (%)', 'OF3 (USD/m3)']
 NUM_OPTIMAL_SOLUTIONS = 30  # same as number of epsilons
 
 
@@ -193,9 +195,7 @@ def main():
         model.del_component(model.e_constraint_oc)
 
     # initialize the CSV file with header
-    header_row = ['Solution No.', 'X1 (mg/L)', 'X2 (mg/L)', 'X3', 'X4 (min)', 'X5 (mA/cm2)',
-                  'OF1 (%)', 'OF2 (%)', 'OF3 (USD/m3)']
-    write_to_csv(filename=CSV_FILE_PATH, row=header_row)
+    write_to_csv(filename=CSV_FILE_PATH, row=CSV_HEADER)
 
     # print the results and write each row to CSV file
     for idx, (eps, result) in enumerate(all_results.items()):
